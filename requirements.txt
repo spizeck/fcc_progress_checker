@@ -1,0 +1,10 @@
+# getting data from website
+bs4
+# creating chart from progress data
+pygal
+# needed for export char as png
+cairosvg
+# preventing errors for export process
+lxml
+cssselect
+tinycss
