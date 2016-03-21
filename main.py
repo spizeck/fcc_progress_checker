@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import csv
+from bs4 import BeautifulSoup
+import urllib.request as request
 import pygal
 
 
@@ -70,12 +72,42 @@ def create_chart(data, x_labels, data_label='data',
     line_chart.render_to_png(save_path)
 
 
+def get_challenge_score(username):
+    '''grabs the current challenge score from given FreeCodeCamp user.
+
+    params:
+        username(string)        username of a FreeCodeCamp user
+
+    returns:
+        int                     current challenge score of given user.
+    '''
+    score = ''
+    url = 'https://www.freecodecamp.com/{}'.format(username)
+    # build new Request object to provide a valid User-Agent
+    req = request.Request(url,
+                          data=None,
+                          headers={'User-Agent':
+                                   'Mozilla/5.0 (X11; U; Linux i686)\
+                                    Gecko/20071127 Firefox/2.0.0.11'})
+
+    with request.urlopen(req) as response:
+        fcc_html = BeautifulSoup(response, 'html.parser')
+        score_tag = fcc_html.find('h1', class_='flat-top text-primary')
+        score = score_tag.get_text().translate({
+            ord('['): '',
+            ord(']'): '',
+            ord(' '): ''
+        })
+    return int(score)
+
+
 if __name__ == '__main__':
     # ToDo: clean up this mess when all works.
     csv_f = './challenge_data.csv'
     scores, dates = read_challenge_data(csv_f)
     create_chart(scores, dates,
                  data_label='challenges',
-                 title='Reddopanda progress on FCC')
+                 title='Reddosaurus progress on FCC')
     # works
     # write_challenge_data(csv_f, [10, 111, '21.03.16'])
+    print(get_challenge_score('reddosaurus'))
