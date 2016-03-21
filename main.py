@@ -12,20 +12,23 @@ def read_challenge_data(file_path):
         file_path(string)       file path to csv file.
 
     returns:
-        tupel                   returns tupel of day scores(list) and
-                                dates(list).
+        tupel                   returns tupel containg day scores(list),
+                                total_score(int) and dates(list).
 
     '''
 
     day_scores = list()
     dates = list()
+    total_score = 0
     with open(file_path) as csv_f:
         reader = csv.reader(csv_f)
         for row, data in enumerate(reader):
             if row != 0:
                 day_scores.append(int(data[0]))
                 dates.append(data[2])
-    return (day_scores, dates)
+                total_score = (data[1])
+
+    return (day_scores, total_score, dates)
 
 
 def write_challenge_data(file_path, new_data):
@@ -104,10 +107,10 @@ def get_challenge_score(username):
 if __name__ == '__main__':
     # ToDo: clean up this mess when all works.
     csv_f = './challenge_data.csv'
-    scores, dates = read_challenge_data(csv_f)
+    scores, total_score, dates = read_challenge_data(csv_f)
     create_chart(scores, dates,
                  data_label='challenges',
                  title='Reddosaurus progress on FCC')
     # works
     # write_challenge_data(csv_f, [10, 111, '21.03.16'])
-    print(get_challenge_score('reddosaurus'))
+    # print(get_challenge_score('reddosaurus'))
