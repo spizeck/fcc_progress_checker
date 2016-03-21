@@ -14,6 +14,7 @@ def read_challenge_data(file_path):
                                 dates(list).
 
     '''
+
     day_scores = list()
     dates = list()
     with open(file_path) as csv_f:
@@ -23,6 +24,26 @@ def read_challenge_data(file_path):
                 day_scores.append(int(data[0]))
                 dates.append(data[2])
     return (day_scores, dates)
+
+
+def write_challenge_data(file_path, new_data):
+    '''appends a new line to the csv file containg the challenge data.
+
+    params:
+        file_path(string)       file path to csv file.
+        new_data                data to be written in the file.
+
+    returns:
+        bool                    True on success and False otherwise.
+    '''
+
+    try:
+        with open(file_path, 'a') as csv_f:
+            writer = csv.writer(csv_f)
+            writer.writerow(new_data)
+        return True
+    except e:
+        return False
 
 
 def create_chart(data, x_labels, data_label='data',
@@ -41,6 +62,7 @@ def create_chart(data, x_labels, data_label='data',
     returns:
         none
     '''
+
     line_chart = pygal.Line()
     line_chart.title = title
     line_chart.x_labels = x_labels
@@ -49,8 +71,11 @@ def create_chart(data, x_labels, data_label='data',
 
 
 if __name__ == '__main__':
+    # ToDo: clean up this mess when all works.
     csv_f = './challenge_data.csv'
     scores, dates = read_challenge_data(csv_f)
     create_chart(scores, dates,
                  data_label='challenges',
-                 title='Yolanda progress on FCC')
+                 title='Reddopanda progress on FCC')
+    # works
+    # write_challenge_data(csv_f, [10, 111, '21.03.16'])
