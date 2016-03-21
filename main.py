@@ -2,6 +2,7 @@
 import csv
 from bs4 import BeautifulSoup
 import urllib.request as request
+from datetime import datetime
 import pygal
 
 
@@ -79,7 +80,7 @@ def get_challenge_score(username):
     '''grabs the current challenge score from given FreeCodeCamp user.
 
     params:
-        username(string)        username of a FreeCodeCamp user
+        username(string)        username of a FreeCodeCamp user.
 
     returns:
         int                     current challenge score of given user.
@@ -104,6 +105,25 @@ def get_challenge_score(username):
     return int(score)
 
 
+def get_new_day_score(username):
+    '''calculates a new day score for given FCC user
+
+    params:
+        username(string)        username of a FreeCodeCamp user.
+
+    returns:
+        list                    list containg new day score, new total score
+                                and the current date.
+    '''
+
+    s, total_score, d = read_challenge_data(csv_f)
+    new_total_score = get_challenge_score(username)
+    new_day_score = new_total_score - int(total_score)
+    date = datetime.now()
+    date_string = '{:02d}.{:02d}.{:4}'.format(date.day, date.month, date.year)
+
+    return [new_day_score, new_total_score, date_string]
+
 if __name__ == '__main__':
     # ToDo: clean up this mess when all works.
     csv_f = './challenge_data.csv'
@@ -112,5 +132,5 @@ if __name__ == '__main__':
                  data_label='challenges',
                  title='Reddosaurus progress on FCC')
     # works
-    # write_challenge_data(csv_f, [10, 111, '21.03.16'])
+    # write_challenge_data(csv_f, get_new_day_score('reddosaurus'))
     # print(get_challenge_score('reddosaurus'))
