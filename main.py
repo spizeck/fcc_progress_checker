@@ -3,6 +3,7 @@ import csv
 from bs4 import BeautifulSoup
 import urllib.request as request
 from datetime import datetime
+import smtplib
 import pygal
 
 
@@ -124,6 +125,24 @@ def get_new_day_score(username):
 
     return [new_day_score, new_total_score, date_string]
 
+
+def send_mail(msg, sender, recievers, pw):
+    for reciever in recievers:
+        email = '\r\n'.join([
+            'From: ' + sender,
+            'To: ' + reciever,
+            'Subject: FCC Check',
+            '',
+            msg
+        ])
+        server = smtplib.SMTP('smtp.gmail.com:587')
+        server.ehlo()
+        server.starttls()
+        server.login(sender, pw)
+        server.sendmail(sender, reciever, email)
+        server.quit()
+
+
 if __name__ == '__main__':
     # ToDo: clean up this mess when all works.
     csv_f = './challenge_data.csv'
@@ -132,5 +151,7 @@ if __name__ == '__main__':
                  data_label='challenges',
                  title='Reddosaurus progress on FCC')
     # works
-    # write_challenge_data(csv_f, get_new_day_score('reddosaurus'))
-    # print(get_challenge_score('reddosaurus'))
+    write_challenge_data(csv_f, get_new_day_score('reddosaurus'))
+    print(get_challenge_score('reddosaurus'))
+    msg = 'Someone did something!'
+    send_mail(msg, 'sender', ['resiever'], 'Passwort')
