@@ -9,11 +9,13 @@ from email.mime.multipart import MIMEMultipart
 import pygal
 
 
-def read_challenge_data(file_path):
+def read_challenge_data(file_path, all=False):
     '''reads in a csv file from given path.
 
     params:
         file_path(string)       file path to csv file.
+        all(bool)               Boolean flag to return all data or latest 7.
+                                Defaults to false.
 
     returns:
         tupel                   returns tupel containg day scores(list),
@@ -26,11 +28,17 @@ def read_challenge_data(file_path):
     total_score = 0
     with open(file_path) as csv_f:
         reader = csv.reader(csv_f)
-        for row, data in enumerate(reader):
-            if row != 0:
-                day_scores.append(int(data[0]))
-                dates.append(data[2])
-                total_score = (data[1])
+        if all:
+            for row, data in enumerate(reader):
+                if row != 0:
+                    day_scores.append(int(data[0]))
+                    dates.append(data[2])
+                    total_score = (data[1])
+        else:
+            for row in list(reader)[-7:]:
+                day_scores.append(int(row[0]))
+                dates.append(row[2])
+                total_score = (row[1])
 
     return (day_scores, total_score, dates)
 
@@ -162,12 +170,13 @@ if __name__ == '__main__':
     # ToDo: clean up this mess when all works.
     csv_f = './challenge_data.csv'
     scores, total_score, dates = read_challenge_data(csv_f)
+    print(read_challenge_data(csv_f))
     create_chart(scores, dates,
                  data_label='challenges',
                  title='Reddosaurus progress on FCC')
     # works
     write_challenge_data(csv_f, get_new_day_score('reddosaurus'))
     print(get_challenge_score('reddosaurus'))
-    #testing sending an image in mail -> works.
+    # testing sending an image in mail -> works.
     msg = './chart.png'
     send_mail(msg, 'sender', ['resiever'], 'Passwort')
