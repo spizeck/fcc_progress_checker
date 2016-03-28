@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 import urllib.request as request
 from datetime import datetime
 import smtplib
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 import pygal
 
 
@@ -126,21 +128,34 @@ def get_new_day_score(username):
     return [new_day_score, new_total_score, date_string]
 
 
-def send_mail(msg, sender, recievers, pw):
-    for reciever in recievers:
-        email = '\r\n'.join([
-            'From: ' + sender,
-            'To: ' + reciever,
-            'Subject: FCC Check',
-            '',
-            msg
-        ])
-        server = smtplib.SMTP('smtp.gmail.com:587')
-        server.ehlo()
-        server.starttls()
-        server.login(sender, pw)
-        server.sendmail(sender, reciever, email)
-        server.quit()
+def send_mail(file_path, sender, recievers, pw):
+    '''sends an email with image attached to a list of adresses.
+
+    params:
+        file_path(string)       Path to the image to attach.
+        sender(string)          E-mail adresse to send from.
+        recievers(list)         List of Strings containing the e-mail adresses
+                                to send to.
+        pw(string)              String containing the password for sending.
+
+    returns:
+        none
+    '''
+    email = MIMEMultipart()
+    email['Subject'] = 'Progress on FCC'
+    email['From'] = sender
+    email['To'] = ', '.join(recievers)
+
+    with open(file_path, 'rb') as f:
+        email.attach(MIMEImage(f.read()))
+
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    print(dir(server))
+    server.ehlo()
+    server.starttls()
+    server.login(sender, pw)
+    server.send_message(email)
+    server.quit()
 
 
 if __name__ == '__main__':
@@ -153,5 +168,6 @@ if __name__ == '__main__':
     # works
     write_challenge_data(csv_f, get_new_day_score('reddosaurus'))
     print(get_challenge_score('reddosaurus'))
-    msg = 'Someone did something!'
+    #testing sending an image in mail -> works.
+    msg = './chart.png'
     send_mail(msg, 'sender', ['resiever'], 'Passwort')
