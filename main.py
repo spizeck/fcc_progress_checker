@@ -116,18 +116,19 @@ def get_challenge_score(username):
     return int(score)
 
 
-def get_new_day_score(username):
+def get_new_day_score(username, file_path):
     '''calculates a new day score for given FCC user
 
     params:
         username(string)        username of a FreeCodeCamp user.
+        file_path               path of csv data file.
 
     returns:
         list                    list containg new day score, new total score
                                 and the current date.
     '''
 
-    s, total_score, d = read_challenge_data(csv_f)
+    s, total_score, d = read_challenge_data(file_path)
     new_total_score = get_challenge_score(username)
     new_day_score = new_total_score - int(total_score)
     date = datetime.now()
@@ -166,17 +167,21 @@ def send_mail(file_path, sender, recievers, pw):
     server.quit()
 
 
-if __name__ == '__main__':
-    # ToDo: clean up this mess when all works.
+def main():
+    # file path to data csv
     csv_f = './challenge_data.csv'
+    # get new challenge data and write them to file
+    write_challenge_data(csv_f, get_new_day_score('reddosaurus', csv_f))
+    # read in the challenge data
     scores, total_score, dates = read_challenge_data(csv_f)
-    print(read_challenge_data(csv_f))
     create_chart(scores, dates,
                  data_label='challenges',
                  title='Reddosaurus progress on FCC')
-    # works
-    write_challenge_data(csv_f, get_new_day_score('reddosaurus'))
-    print(get_challenge_score('reddosaurus'))
-    # testing sending an image in mail -> works.
+    # path to chart image
+    # maybe returning it later from create_chart function?
     msg = './chart.png'
+    # send mail
     send_mail(msg, 'sender', ['resiever'], 'Passwort')
+
+if __name__ == '__main__':
+    main()
