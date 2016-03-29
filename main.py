@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import argparse
 import csv
 from bs4 import BeautifulSoup
 import urllib.request as request
@@ -159,7 +160,6 @@ def send_mail(file_path, sender, recievers, pw):
         email.attach(MIMEImage(f.read()))
 
     server = smtplib.SMTP('smtp.gmail.com:587')
-    print(dir(server))
     server.ehlo()
     server.starttls()
     server.login(sender, pw)
@@ -167,13 +167,13 @@ def send_mail(file_path, sender, recievers, pw):
     server.quit()
 
 
-def main():
+def main(args):
     # file path to data csv
     csv_f = './challenge_data.csv'
     # get new challenge data and write them to file
     write_challenge_data(csv_f, get_new_day_score('reddosaurus', csv_f))
     # read in the challenge data
-    scores, total_score, dates = read_challenge_data(csv_f)
+    scores, total_score, dates = read_challenge_data(csv_f, args.all)
     create_chart(scores, dates,
                  data_label='challenges',
                  title='Reddosaurus progress on FCC')
@@ -181,7 +181,16 @@ def main():
     # maybe returning it later from create_chart function?
     msg = './chart.png'
     # send mail
-    send_mail(msg, 'sender', ['resiever'], 'Passwort')
+    reciever_list = args.reciever_adresses.split(',')
+    send_mail(msg, args.login_email, reciever_list, args.password)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Checks the progress on FCC.')
+    parser.add_argument('-a', '--all', action='store_true', help='Setting \
+                        option to use all data for char generation')
+    parser.add_argument('login_email', help='E-mail adress to send from')
+    parser.add_argument('password', help='Password of login-email')
+    parser.add_argument('reciever_adresses', help='Comma seperated list of \
+                        reciever adresses. No whitespaces allowed!')
+    args = parser.parse_args()
+    main(args)
