@@ -10,26 +10,25 @@ from email.mime.multipart import MIMEMultipart
 import pygal
 
 
-def read_challenge_data(file_path, all=False):
-    '''reads in a csv file from given path.
+def read_challenge_data(file_path, all_data=False):
+    """Reads in a csv file from given path.
 
-    params:
-        file_path(string)       file path to csv file.
-        all(bool)               Boolean flag to return all data or latest 7.
-                                Defaults to false.
-
-    returns:
-        tupel                   returns tupel containg day scores(list),
-                                total_score(int) and dates(list).
-
-    '''
+        :param file_path: file path to csv file.
+        :param all_data: Boolean flag to return all data or latest 7.
+        Defaults to false.
+        :type file_path: str
+        :type all_data: bool
+        :returns: returns tuple containing day scores(list),
+        total_score(int) and dates(list).
+        :rtype: tuple
+    """
 
     day_scores = list()
     dates = list()
     total_score = 0
     with open(file_path) as csv_f:
         reader = csv.reader(csv_f)
-        if all:
+        if all_data:
             for row, data in enumerate(reader):
                 if row != 0:
                     day_scores.append(int(data[0]))
@@ -41,45 +40,46 @@ def read_challenge_data(file_path, all=False):
                 dates.append(row[2])
                 total_score = (row[1])
 
-    return (day_scores, total_score, dates)
+    return day_scores, total_score, dates
 
 
 def write_challenge_data(file_path, new_data):
-    '''appends a new line to the csv file containg the challenge data.
+    """appends a new line to the csv file containing the challenge data.
 
-    params:
-        file_path(string)       file path to csv file.
-        new_data                data to be written in the file.
-
-    returns:
-        bool                    True on success and False otherwise.
-    '''
+        :param file_path: file path to csv file.
+        :param new_data: data to be written in the file.
+        :type file_path: str
+        :returns: True on success and False otherwise.
+        :rtype: bool
+    """
 
     try:
         with open(file_path, 'a') as csv_f:
             writer = csv.writer(csv_f)
             writer.writerow(new_data)
         return True
-    except e:
+    except IOError:
         return False
 
 
 def create_chart(data, x_labels, data_label='data',
                  title='', save_path='chart.png'):
-    '''creates a simple line chart based on input and saves it as png.
+    """creates a simple line chart based on input and saves it as png.
 
-    params:
-        data(list)              data to display on chart.
-        x_labels(list)          list of labels for x-achsis.
-        data_label(str)         name for the data on the chart.
-                                default: 'data'
-        title(str)              name of the chart. default: ''
-        save_path               path for saving the char as png.
-                                default: 'chart.png'
+        :param data: Data to display on chart.
+        :param x_labels: List of labels for x-axis.
+        :param data_label: Name for the data on the chart,
+        default is 'data'.
+        :param title: Name of the chart, default is ''.
+        :param save_path: Path for saving the chart as png,
+        default is 'chart.png'.
+        :type data: list
+        :type x_labels: list
+        :type data_label: str
+        :type save_path: str
+        :returns: None
 
-    returns:
-        none
-    '''
+    """
 
     line_chart = pygal.Line()
     line_chart.title = title
@@ -89,15 +89,13 @@ def create_chart(data, x_labels, data_label='data',
 
 
 def get_challenge_score(username):
-    '''grabs the current challenge score from given FreeCodeCamp user.
+    """grabs the current challenge score from given FreeCodeCamp user.
 
-    params:
-        username(string)        username of a FreeCodeCamp user.
-
-    returns:
-        int                     current challenge score of given user.
-    '''
-    score = ''
+        :param username: Username of a FreeCodeCamp user.
+        :type username: str
+        :returns: Current challenge score of given user.
+        :rtype: int
+    """
     url = 'https://www.freecodecamp.com/{}'.format(username)
     # build new Request object to provide a valid User-Agent
     req = request.Request(url,
@@ -118,16 +116,16 @@ def get_challenge_score(username):
 
 
 def get_new_day_score(username, file_path):
-    '''calculates a new day score for given FCC user
+    """calculates a new day score for given FCC user
 
-    params:
-        username(string)        username of a FreeCodeCamp user.
-        file_path               path of csv data file.
-
-    returns:
-        list                    list containg new day score, new total score
-                                and the current date.
-    '''
+        :param username: Username of a FreeCodeCamp user.
+        :param file_path: Path of csv data file.
+        :type username: str
+        :type file_path: str
+        :returns: List containing new day score, new total score,
+        and the current date.
+        :rtype: list
+    """
 
     s, total_score, d = read_challenge_data(file_path)
     new_total_score = get_challenge_score(username)
@@ -138,23 +136,24 @@ def get_new_day_score(username, file_path):
     return [new_day_score, new_total_score, date_string]
 
 
-def send_mail(file_path, sender, recievers, pw):
-    '''sends an email with image attached to a list of adresses.
+def send_mail(file_path, sender, receivers, pw):
+    """sends an email with image attached to a list of addresses.
 
-    params:
-        file_path(string)       Path to the image to attach.
-        sender(string)          E-mail adresse to send from.
-        recievers(list)         List of Strings containing the e-mail adresses
-                                to send to.
-        pw(string)              String containing the password for sending.
-
-    returns:
-        none
-    '''
+        :param file_path: Path to the image to attach.
+        :param sender: E-mail address to send from.
+        :param receivers: List of strings containing the e-mail addresses
+        to send to.
+        :param pw: String containing the password for sending.
+        :type file_path: str
+        :type sender: str
+        :type receivers: list
+        :type pw: str
+        :returns: None
+    """
     email = MIMEMultipart()
     email['Subject'] = 'Progress on FCC'
     email['From'] = sender
-    email['To'] = ', '.join(recievers)
+    email['To'] = ', '.join(receivers)
 
     with open(file_path, 'rb') as f:
         email.attach(MIMEImage(f.read()))
@@ -167,13 +166,13 @@ def send_mail(file_path, sender, recievers, pw):
     server.quit()
 
 
-def main(args):
+def main(arg):
     # file path to data csv
     csv_f = './challenge_data.csv'
     # get new challenge data and write them to file
     write_challenge_data(csv_f, get_new_day_score('reddosaurus', csv_f))
     # read in the challenge data
-    scores, total_score, dates = read_challenge_data(csv_f, args.all)
+    scores, total_score, dates = read_challenge_data(csv_f, arg.all)
     create_chart(scores, dates,
                  data_label='challenges',
                  title='Reddosaurus progress on FCC')
@@ -181,16 +180,16 @@ def main(args):
     # maybe returning it later from create_chart function?
     msg = './chart.png'
     # send mail
-    reciever_list = args.reciever_adresses.split(',')
-    send_mail(msg, args.login_email, reciever_list, args.password)
+    receiver_list = arg.reciever_adresses.split(',')
+    send_mail(msg, arg.login_email, receiver_list, arg.password)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Checks the progress on FCC.')
     parser.add_argument('-a', '--all', action='store_true', help='Setting \
                         option to use all data for char generation')
-    parser.add_argument('login_email', help='E-mail adress to send from')
+    parser.add_argument('login_email', help='E-mail address to send from')
     parser.add_argument('password', help='Password of login-email')
-    parser.add_argument('reciever_adresses', help='Comma seperated list of \
-                        reciever adresses. No whitespaces allowed!')
-    args = parser.parse_args()
-    main(args)
+    parser.add_argument('receiver_addresses', help='Comma separated list of \
+                        receiver addresses. No whitespaces allowed!')
+    argument = parser.parse_args()
+    main(argument)
